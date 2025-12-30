@@ -1,0 +1,32 @@
+name: Sync to Hugging Face Hub
+
+on:
+  push:
+    branches: [main] # Robot jalan setiap ada push ke branch main
+
+# Supaya robot bisa baca isi repo
+permissions:
+  contents: read
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Ambil semua history git (penting untuk sync)
+          lfs: true      # Aktifkan LFS barangkali ada file besar
+
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USERNAME: "ahmadnazirarrobi" 
+          HF_SPACE_NAME: "sql-to-go-converter"
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          # Menambah remote Hugging Face dengan autentikasi token
+          git remote add space https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/$HF_USERNAME/$HF_SPACE_NAME
+          # Paksa push (Force Push) agar Space persis sama dengan GitHub
+          git push --force space main
