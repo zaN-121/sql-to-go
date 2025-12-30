@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SQL to Go Struct Converter | Instant & Clean Code Generator</title>
+    <meta name="description" content="Free developer tool to instantly convert MySQL/PostgreSQL CREATE TABLE to idiomatic Go structs. Supports auto-alignment, GORM tags, and JSON tags. No login required.">
+    <meta name="keywords" content="sql to go struct, golang struct converter, json tags generator, gorm struct generator, sql parser, go backend tools">
+    <meta name="author" content="Your Name">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://APP-ANDA.up.railway.app/">
+    <meta property="og:title" content="SQL to Go Struct Converter - Clean & Fast">
+    <meta property="og:description" content="Stop writing struct tags manually. Convert SQL to Go structs with perfect vertical alignment instantly.">
+    <meta property="og:image" content="https://placehold.co/1200x630/00ADD8/white?text=SQL+to+Go+Struct">
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <title>SQL to Go Struct Converter</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        textarea, pre {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+        }
+        .container-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            height: calc(100vh - 200px);
+            min-width: 0;
+        }
+        @media (max-width: 768px) {
+            .container-split {
+                grid-template-columns: 1fr;
+                height: auto;
+                gap: 0.75rem;
+            }
+            .container {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
+            textarea, pre {
+                font-size: 12px !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-full overflow-x-hidden">
+        <!-- Header -->
+        <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">SQL to Go Struct Converter</h1>
+                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Convert your CREATE TABLE statements into clean, properly aligned Go structs</p>
+            </div>
+            <button 
+                onclick="toggleDarkMode()" 
+                class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition self-end sm:self-auto"
+                title="Toggle dark mode"
+            >
+                <span class="dark:hidden">🌙</span>
+                <span class="hidden dark:inline">☀️</span>
+            </button>
+        </div>
+
+        <!-- Config Options -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 mb-4 transition-colors mx-0">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-3">Configuration</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" id="addJSONTag" checked class="w-4 h-4 text-blue-600 rounded focus:ring-2">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">JSON Tags</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" id="addGormTag" class="w-4 h-4 text-blue-600 rounded focus:ring-2">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">GORM Tags</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" id="addXMLTag" class="w-4 h-4 text-blue-600 rounded focus:ring-2">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">XML Tags</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" id="addDBTag" class="w-4 h-4 text-blue-600 rounded focus:ring-2">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">DB Tags (sqlx)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Split Pane Layout -->
+        <div class="container-split mb-4">
+            <!-- Left Pane: SQL Input -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 flex flex-col transition-colors min-w-0">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">SQL Input</h2>
+                    <button onclick="loadExample()" class="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium whitespace-nowrap">
+                        Load Example
+                    </button>
+                </div>
+                <textarea 
+                    id="sqlInput" 
+                    class="flex-1 w-full p-2 sm:p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[200px] text-xs sm:text-sm"
+                    placeholder="Paste your CREATE TABLE statement here...
+
+Example:
+CREATE TABLE users (
+    id BIGINT UNSIGNED NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(255),
+    created_at DATETIME NOT NULL
+);"
+                ></textarea>
+                <div class="mt-3">
+                    <button 
+                        onclick="convert()" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out text-sm sm:text-base"
+                    >
+                        Convert to Go
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Pane: Go Output -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 flex flex-col transition-colors min-w-0">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">Go Output</h2>
+                    <button 
+                        onclick="copyToClipboard(event)" 
+                        class="text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-1 px-2 sm:px-3 rounded transition whitespace-nowrap"
+                    >
+                        📋 Copy
+                    </button>
+                </div>
+                <div class="flex-1 overflow-auto min-h-[200px]">
+                    <pre id="goOutput" class="w-full h-full p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 dark:text-white rounded-lg text-xs sm:text-sm whitespace-pre overflow-x-auto break-words"><span class="text-gray-400 dark:text-gray-500">Generated Go code will appear here...</span></pre>
+                </div>
+                <div id="errorOutput" class="mt-3 p-2 sm:p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-xs sm:text-sm hidden break-words"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-4 sm:mt-6 text-center mx-0">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 mb-4 transition-colors">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    Hi, I am <span class="font-semibold text-gray-900 dark:text-white">Ahmad Nazir Arrobi</span>
+                </p>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+                    <a 
+                        href="https://github.com/zaN-121" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white rounded-lg transition-colors duration-200 font-medium justify-center text-sm sm:text-base"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                        </svg>
+                        <span>GitHub: zaN-121</span>
+                    </a>
+                    <a 
+                        href="https://ko-fi.com/ahmadnazirarrobi" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-[#FF5E5B] hover:bg-[#E54E4B] text-white rounded-lg transition-colors duration-200 font-medium justify-center shadow-sm text-sm sm:text-base"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/>
+                        </svg>
+                        <span>Support on Ko-fi</span>
+                    </a>
+                </div>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-2 sm:px-4">
+                Features: Multi-DB support • Smart nullable detection • Perfect alignment • UNSIGNED types • Auto imports
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let debounceTimer;
+
+        // Auto-convert on input change (debounced)
+        document.getElementById('sqlInput').addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(convert, 500);
+        });
+
+        // Auto-convert on config change
+        ['addJSONTag', 'addGormTag', 'addXMLTag', 'addDBTag'].forEach(id => {
+            document.getElementById(id).addEventListener('change', convert);
+        });
+
+        // Load example SQL
+        function loadExample() {
+            const example = `CREATE TABLE user_profiles (
+    user_id BIGINT UNSIGNED NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    full_name VARCHAR(200),
+    bio TEXT,
+    avatar_url VARCHAR(500),
+    birth_date DATE,
+    is_verified TINYINT(1) NOT NULL DEFAULT 0,
+    follower_count INT UNSIGNED DEFAULT 0,
+    last_login_at TIMESTAMP,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    PRIMARY KEY (user_id),
+    UNIQUE KEY unique_username (username),
+    INDEX idx_verified (is_verified)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+            
+            document.getElementById('sqlInput').value = example;
+            convert();
+        }
+
+        // Convert SQL to Go
+        async function convert() {
+            const sql = document.getElementById('sqlInput').value.trim();
+            const errorOutput = document.getElementById('errorOutput');
+            const goOutput = document.getElementById('goOutput');
+
+            // Clear previous error
+            errorOutput.classList.add('hidden');
+            
+            if (!sql) {
+                goOutput.innerHTML = '<span class="text-gray-400">Generated Go code will appear here...</span>';
+                return;
+            }
+
+            // Get config
+            const config = {
+                AddJSONTag: document.getElementById('addJSONTag').checked,
+                AddGormTag: document.getElementById('addGormTag').checked,
+                AddXMLTag: document.getElementById('addXMLTag').checked,
+                AddDBTag: document.getElementById('addDBTag').checked
+            };
+
+            try {
+                const response = await fetch('/api/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sql, config })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    // Show error
+                    errorOutput.textContent = '❌ ' + data.error;
+                    errorOutput.classList.remove('hidden');
+                    goOutput.innerHTML = '<span class="text-gray-400">Fix the error above to see the output</span>';
+                } else {
+                    // Show generated code
+                    goOutput.textContent = data.code;
+                }
+            } catch (error) {
+                errorOutput.textContent = '❌ Network error: ' + error.message;
+                errorOutput.classList.remove('hidden');
+            }
+        }
+
+        // Copy to clipboard
+        async function copyToClipboard(event) {
+            const outputElement = document.querySelector('#goOutput');
+            
+            console.log('Copy button clicked');
+            
+            if (!outputElement) {
+                console.error('goOutput element not found in DOM');
+                alert('Output element not found. Please refresh the page.');
+                return;
+            }
+
+            const text = outputElement.textContent;
+
+            if (!text || text.includes('Generated Go code') || text.includes('Fix the error')) {
+                console.log('No valid content to copy');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(text);
+                // Show feedback
+                const button = event.target;
+                button.textContent = '✅ Copied!';
+                button.classList.add('bg-green-100', 'text-green-700');
+                
+                setTimeout(() => {
+                    button.textContent = '📋 Copy';
+                    button.classList.remove('bg-green-100', 'text-green-700');
+                }, 2000);
+            } catch (error) {
+                console.error('Copy failed:', error);
+                alert('Failed to copy to clipboard: ' + error.message);
+            }
+        }
+
+        // Dark mode toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+        }
+
+        // Initialize dark mode from localStorage
+        function initDarkMode() {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'false') {
+                document.documentElement.classList.remove('dark');
+            } else if (darkMode === null) {
+                // Default to system preference
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initDarkMode();
+            loadExample();
+        });
+    </script>
+</body>
+</html>
