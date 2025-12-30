@@ -34,7 +34,7 @@ WORKDIR /root/
 COPY --from=builder /app/sql-to-go .
 
 # Expose port
-EXPOSE 8080
+EXPOSE 7860
 
 # Jalankan
 CMD ["./sql-to-go"]

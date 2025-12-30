@@ -34,7 +34,7 @@ func main() {
 	// API endpoint for conversion
 	http.HandleFunc("/api/convert", handleConvert)
 
-	port := ":8080"
+	port := ":7860"
 	log.Printf("🚀 SQL to Go Converter server starting on http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, nil))
 }
