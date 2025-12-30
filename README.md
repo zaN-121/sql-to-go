@@ -1,3 +1,20 @@
+---
+title: SQL To Go Converter
+emoji: 🦀
+colorFrom: blue
+colorTo: cyan
+sdk: docker
+app_port: 7860
+pinned: false
+tags:
+  - developer-tools
+  - go
+  - sql
+---
+
+# SQL to Go Struct Converter
+(Lanjutkan dengan isi README lama Anda di sini...)
+
 # SQL to Go Struct Converter
 
 A robust, production-ready SQL CREATE TABLE to Go struct converter with flexible code generation and a beautiful web interface.
